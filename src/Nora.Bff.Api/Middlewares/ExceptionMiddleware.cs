@@ -1,4 +1,5 @@
 ﻿using Nora.Core.Domain.Exceptions;
+using Refit;
 using System.Net;
 using System.Text.Json;
 
@@ -11,6 +12,10 @@ public class ExceptionMiddleware(RequestDelegate next)
         try
         {
             await next(httpContext);
+        }
+        catch (ApiException ex)
+        {
+            await HandleRequestExceptionAsync(httpContext, ex);
         }
         catch (DomainException ex)
         {
@@ -29,5 +34,30 @@ public class ExceptionMiddleware(RequestDelegate next)
         context.Response.ContentType = "application/json";
         context.Response.StatusCode = (int)statusCode;
         await context.Response.WriteAsync(message);
+    }
+
+    private static async Task HandleRequestExceptionAsync(HttpContext context, ApiException exception)
+    {
+        context.Response.ContentType = "application/json";
+        context.Response.StatusCode = (int)exception.StatusCode;
+
+        if (exception.StatusCode == HttpStatusCode.NoContent) return;
+
+        await SetResponseAsync(context, exception);
+    }
+
+    private static async Task SetResponseAsync(HttpContext context, ApiException exception)
+    {
+        var message = await GetMessageAsync(exception);
+        await context.Response.WriteAsync(message);
+    }
+
+    private static async Task<string> GetMessageAsync(ApiException exception)
+    {
+        var message = !string.IsNullOrEmpty(exception.Content)
+            ? await exception.GetContentAsAsync<dynamic>()
+            : exception.Message;
+
+        return JsonSerializer.Serialize(message);
     }
 }

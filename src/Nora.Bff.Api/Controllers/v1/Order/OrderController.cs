@@ -2,7 +2,7 @@
 using Nora.Bff.Api.Domain.Clients.v1.Order.Order;
 using Nora.Bff.Api.Domain.Contracts.v1.Services.Order;
 
-namespace Nora.Bff.Api.Controllers;
+namespace Nora.Bff.Api.Controllers.v1.Order;
 
 [ApiController]
 [Route("api/v1/orders")]
