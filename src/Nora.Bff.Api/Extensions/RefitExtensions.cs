@@ -1,6 +1,7 @@
 ﻿using Nora.Bff.Api.Domain.Clients.v1.Order.Order;
 using Nora.Bff.Api.Domain.Clients.v1.Product.Category;
 using Nora.Bff.Api.Domain.Clients.v1.Product.Product;
+using Nora.Bff.Api.Domain.Clients.v1.User.User;
 using Nora.Core.Api.Refit.Extensions;
 
 namespace Nora.Bff.Api.Extensions;
@@ -11,7 +12,8 @@ public static class RefitExtensions
     {
         services
             .AddOrderClients(configuration)
-            .AddProductClients(configuration);
+            .AddProductClients(configuration)
+            .AddUserClients(configuration);
 
         return services;
     }
@@ -33,6 +35,16 @@ public static class RefitExtensions
         services
             .AddRefitClient<IProductClient>(product + "/v1/products")
             .AddRefitClient<ICategoryClient>(product + "/v1/categories");
+
+        return services;
+    }
+
+    public static IServiceCollection AddUserClients(this IServiceCollection services, IConfiguration configuration)
+    {
+        var user = configuration.GetSection("ServiceEndpoints").GetValue<string>("User");
+
+        services
+            .AddRefitClient<IUserClient>(user + "/v1/users");
 
         return services;
     }
